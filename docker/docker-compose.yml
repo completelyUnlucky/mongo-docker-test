@@ -1,0 +1,26 @@
+services:
+  app:
+    image: openjdk:21
+    container_name: app-container
+    volumes:
+      - ./app.jar:/usr/app/app.jar
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://localhost:27017/bot-mongo
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    command: "java -jar /usr/app/app.jar"
+
+  db:
+    image: mongo:latest
+    container_name: mongo-container
+    environment:
+      - MONGO_INITDB_DATABASE=bot-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - db_data:/data/db
+
+volumes:
+  db_data: {}
