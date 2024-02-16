@@ -3,7 +3,6 @@ package com.todo.bot.service;
 import com.todo.bot.config.BotConfig;
 import com.todo.bot.model.BotModel;
 import com.todo.bot.repos.BotRepo;
-import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,7 +18,6 @@ import java.util.*;
 
 @Slf4j
 @Component
-@EqualsAndHashCode(callSuper = true)
 public class BotService extends TelegramLongPollingBot {
 
     private final BotConfig botConfig;
@@ -30,9 +28,12 @@ public class BotService extends TelegramLongPollingBot {
     public BotService(BotConfig botConfig) {
         this.botConfig = botConfig;
         List<BotCommand> botCommandList = new ArrayList<>();
-        botCommandList.add(new BotCommand("/start", "launch a bot"));
-//        botCommandList.add(new BotCommand("/help", "get a help"));
-//        botCommandList.add(new BotCommand("/author", "get author information"));
+        botCommandList.add(new BotCommand("/start", "Запустить бота"));
+        botCommandList.add(new BotCommand("/add", "Добавить задачу"));
+        botCommandList.add(new BotCommand("/list", "Получить список добавленных задач"));
+        botCommandList.add(new BotCommand("/complete", "Пометить задание как завершенное"));
+        botCommandList.add(new BotCommand("/remove", "Убрать задачу из списка"));
+        botCommandList.add(new BotCommand("/help", "Инструкция по использованию"));
         try {
             this.execute(new SetMyCommands(botCommandList, new BotCommandScopeDefault(), "en"));
         } catch (TelegramApiException e) {
@@ -74,6 +75,22 @@ public class BotService extends TelegramLongPollingBot {
                 String task = messageText.substring(8);
                 removeTask(chatId, task);
                 sendMessage(chatId, "Task removed: " + task, false);
+            } else if (messageText.equals("/help")) {
+                sendMessage(chatId,
+                        """
+                        • Добавить задачу в список дел - /add <задача>
+                        Пример: /add Побегать с утра
+                        
+                        • Получить список добавленных задач - /list
+                        Пример: /list
+                        
+                        • Пометить задание как завершенное - /complete <задача>
+                        Пример: /complete Сделать домашнее задание
+                        
+                        • Убрать задачу из списка - /remove <задача>
+                        Пример: /remove Вкусно покушать
+                        
+                        """, false);
             }
         }
     }
